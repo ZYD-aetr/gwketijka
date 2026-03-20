@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyProductivity</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: #E5E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #A09890;
+    --accent: #C8773A;
+    --accent2: #2D6A4F;
+    --accent3: #5B4E8A;
+    --danger: #C84B4B;
+    --warn: #C8A03A;
+    --radius: 14px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HAMBURGER NAVBAR */
+  #hamburger-btn {
+    position: fixed; top: 16px; right: 16px; z-index: 1001;
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    box-shadow: var(--shadow); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  #hamburger-btn:hover { background: var(--surface2); box-shadow: var(--shadow-lg); }
+  .hb-line {
+    width: 20px; height: 2px; background: var(--text); border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  #hamburger-btn.open .hb-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  #hamburger-btn.open .hb-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  #hamburger-btn.open .hb-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  #nav-drawer {
+    position: fixed; top: 0; right: 0; z-index: 1000;
+    width: 240px; height: 100vh;
+    background: var(--surface); border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column; padding: 80px 16px 24px 16px; gap: 4px;
+    overflow-y: auto;
+  }
+  #nav-drawer.open { transform: translateX(0); }
+  #nav-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25);
+    z-index: 999; backdrop-filter: blur(2px);
+  }
+  #nav-overlay.open { display: block; }
+
+  .nav-drawer-title {
+    font-family: 'DM Serif Display', serif; font-size: 1.1rem;
+    color: var(--text3); padding: 0 12px 12px 12px;
+    border-bottom: 1px solid var(--border); margin-bottom: 8px;
+  }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 11px 14px; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--text2); transition: all 0.18s;
+    display: flex; align-items: center; gap: 10px; text-align: left; width: 100%;
+  }
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: var(--accent); color: #fff; }
+  .nav-icon { font-size: 17px; width: 22px; text-align: center; }
+
+  /* MAIN */
+  #main { padding: 80px 32px 60px 32px; max-width: 1100px; margin: 0 auto; }
+
+  /* PAGE SYSTEM */
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 32px; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2.2rem; color: var(--text); }
+  .page-header p { color: var(--text2); margin-top: 4px; font-size: 15px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow); margin-bottom: 20px;
+  }
+  .card h3 { font-size: 14px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } #navbar { padding: 8px; } .nav-btn span.nav-label { display: none; } }
+
+  /* BUTTONS */
+  .btn {
+    padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-icon { padding: 7px; border-radius: 7px; background: var(--surface2); border: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.18s; }
+  .btn-icon:hover { background: var(--border); }
+
+  /* INPUTS */
+  input[type=text], input[type=number], input[type=date], textarea, select {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--bg); color: var(--text); transition: border 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 90px; }
+  label { font-size: 13px; font-weight: 500; color: var(--text2); display: block; margin-bottom: 6px; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  .badge-green { background: #D4EDDA; color: #2D6A4F; }
+  .badge-orange { background: #FFE8D4; color: #C8773A; }
+  .badge-red { background: #FFD4D4; color: #C84B4B; }
+  .badge-purple { background: #E8E2F5; color: #5B4E8A; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.5s ease; }
+
+  /* ===================== DASHBOARD ===================== */
+  #quote-card {
+    background: linear-gradient(135deg, #1A1714 0%, #2D2420 100%);
+    color: #fff; border-radius: var(--radius); padding: 28px 32px;
+    margin-bottom: 24px; position: relative; overflow: hidden;
+  }
+  #quote-card::before {
+    content: '"'; position: absolute; top: -10px; left: 20px;
+    font-family: 'DM Serif Display', serif; font-size: 120px; color: rgba(255,255,255,0.06); line-height: 1;
+  }
+  #quote-text { font-family: 'DM Serif Display', serif; font-size: 1.3rem; line-height: 1.5; position: relative; }
+  #quote-author { margin-top: 10px; font-size: 13px; color: rgba(255,255,255,0.5); position: relative; }
+
+  .stat-card { text-align: center; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 2.4rem; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* Water tracker */
+  .water-glasses { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .glass {
+    width: 36px; height: 44px; border: 2px solid var(--border);
+    border-radius: 4px 4px 6px 6px; cursor: pointer; transition: all 0.2s;
+    background: var(--surface2); position: relative; overflow: hidden;
+  }
+  .glass.filled { border-color: #5BA4CF; background: #AED9F5; }
+  .glass:hover { transform: translateY(-2px); }
+
+  /* Discipline score */
+  .discipline-ring { display: flex; align-items: center; gap: 20px; }
+  .ring-wrap { position: relative; width: 80px; height: 80px; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-score {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--accent);
+  }
+
+  /* ===================== HABITS ===================== */
+  .habit-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .habit-item:last-child { border-bottom: none; }
+  .habit-check {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 2px solid var(--border); background: var(--surface2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: all 0.2s; flex-shrink: 0;
+  }
+  .habit-check.done { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .habit-info { flex: 1; }
+  .habit-name { font-weight: 500; font-size: 15px; }
+  .habit-streak { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .streak-fire { color: #F4843C; }
+  .habit-actions { display: flex; gap: 6px; }
+
+  .streak-calendar { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 12px; }
+  .streak-dot {
+    width: 14px; height: 14px; border-radius: 3px; background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .streak-dot.done { background: var(--accent2); border-color: var(--accent2); }
+  .streak-dot.miss { background: #FFD4D4; border-color: var(--danger); }
+
+  /* ===================== JOURNAL ===================== */
+  .journal-entry {
+    padding: 16px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .journal-entry:hover { padding-left: 6px; }
+  .journal-date { font-size: 12px; color: var(--text3); font-weight: 500; }
+  .journal-preview { margin-top: 4px; font-size: 14px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .journal-mood { margin-top: 6px; display: flex; gap: 6px; align-items: center; }
+  .mood-btn {
+    font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px;
+    background: var(--surface2); border: 2px solid transparent; transition: all 0.2s;
+  }
+  .mood-btn.selected { border-color: var(--accent); background: #FFE8D4; }
+
+  /* ===================== TODO ===================== */
+  .todo-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--border); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .todo-check.done { background: var(--accent2); border-color: var(--accent2); color: #fff; font-size: 12px; }
+  .todo-text { flex: 1; font-size: 14px; }
+  .todo-text.done-text { text-decoration: line-through; color: var(--text3); }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .p-high { background: var(--danger); }
+  .p-med { background: var(--warn); }
+  .p-low { background: var(--accent2); }
+
+  /* ===================== GOALS ===================== */
+  .goal-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; margin-bottom: 14px;
+  }
+  .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .goal-title { font-weight: 600; font-size: 16px; }
+  .goal-deadline { font-size: 12px; color: var(--text3); }
+  .milestone-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .milestone-item:last-child { border-bottom: none; }
+
+  /* ===================== KEUANGAN ===================== */
+  .tx-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-info { flex: 1; }
+  .tx-name { font-size: 14px; font-weight: 500; }
+  .tx-cat { font-size: 12px; color: var(--text3); }
+  .tx-amount { font-weight: 600; font-size: 15px; }
+  .tx-in { color: var(--accent2); }
+  .tx-out { color: var(--danger); }
+  .budget-bar { margin-bottom: 14px; }
+  .budget-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+
+  /* ===================== TIME TRACKING ===================== */
+  .timer-display {
+    font-family: 'DM Serif Display', serif; font-size: 3.5rem; text-align: center;
+    color: var(--text); letter-spacing: 0.05em; margin: 20px 0;
+  }
+  .timer-controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+  .session-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+
+  /* ===================== PUNISHMENT ===================== */
+  .punishment-list { list-style: none; }
+  .punishment-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .punishment-item:last-child { border-bottom: none; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 2000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius); padding: 28px;
+    width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.2s ease;
+  }
+  .modal h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 20px; }
+  .modal-footer { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; }
+  .form-group { margin-bottom: 14px; }
+
+  /* NOTIFICATION TOAST */
+  #toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .toast {
+    background: var(--text); color: #fff; padding: 12px 22px;
+    border-radius: 99px; font-size: 14px; font-weight: 500;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    white-space: nowrap;
+  }
+  .toast.warn { background: var(--warn); color: var(--text); }
+  .toast.success { background: var(--accent2); }
+  .toast.water { background: #5BA4CF; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+  /* EXPORT/IMPORT */
+  .data-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* CHART placeholder */
+  .chart-container { position: relative; height: 200px; }
+  canvas { border-radius: 8px; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* Misc */
+  .empty-state { text-align: center; padding: 32px; color: var(--text3); font-size: 14px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--surface2); color: var(--text2); margin-right: 4px; }
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row > * { flex: 1; }
+  .row .btn { flex: 0 0 auto; margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<!-- HAMBURGER BUTTON -->
+<button id="hamburger-btn" onclick="toggleDrawer()" aria-label="Menu">
+  <div class="hb-line"></div>
+  <div class="hb-line"></div>
+  <div class="hb-line"></div>
+</button>
+
+<!-- NAV OVERLAY -->
+<div id="nav-overlay" onclick="closeDrawer()"></div>
+
+<!-- NAV DRAWER -->
+<nav id="nav-drawer">
+  <div class="nav-drawer-title">MyProductivity</div>
+  <button class="nav-btn active" onclick="navTo('home')" id="nav-home"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-btn" onclick="navTo('habits')" id="nav-habits"><span class="nav-icon">🔥</span>Habit Tracker</button>
+  <button class="nav-btn" onclick="navTo('journal')" id="nav-journal"><span class="nav-icon">📓</span>Daily Journal</button>
+  <button class="nav-btn" onclick="navTo('todo')" id="nav-todo"><span class="nav-icon">✅</span>To-Do List</button>
+  <button class="nav-btn" onclick="navTo('goals')" id="nav-goals"><span class="nav-icon">🎯</span>Goals</button>
+  <button class="nav-btn" onclick="navTo('finance')" id="nav-finance"><span class="nav-icon">💰</span>Keuangan</button>
+  <button class="nav-btn" onclick="navTo('timetrack')" id="nav-timetrack"><span class="nav-icon">⏱️</span>Time Tracking</button>
+  <button class="nav-btn" onclick="navTo('settings')" id="nav-settings"><span class="nav-icon">⚙️</span>Pengaturan</button>
+</nav>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<div id="main">
+
+<!-- =================== HOME / DASHBOARD =================== -->
+<div class="page active" id="page-home">
+  <div id="quote-card">
+    <div id="quote-text">Loading quote...</div>
+    <div id="quote-author"></div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card stat-card">
+      <div class="stat-num" id="dash-streak">0</div>
+      <div class="stat-label">🔥 Hari Streak Terpanjang</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-num" id="dash-tasks">0</div>
+      <div class="stat-label">✅ Tugas Selesai Hari Ini</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-num" id="dash-score">0%</div>
+      <div class="stat-label">🏅 Discipline Score</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Water Tracker -->
+    <div class="card">
+      <h3>💧 Minum Air Hari Ini</h3>
+      <div style="font-size:13px; color:var(--text2); margin-bottom:10px;"><span id="water-count">0</span> / 8 gelas</div>
+      <div class="water-glasses" id="water-glasses"></div>
+    </div>
+
+    <!-- Habit Summary -->
+    <div class="card">
+      <h3>🔥 Habits Hari Ini</h3>
+      <div id="dash-habits-list">
+        <div class="empty-state">Belum ada habit. Tambah di halaman Habits!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discipline Ring -->
+  <div class="card">
+    <h3>📊 Weekly Discipline Score</h3>
+    <div class="discipline-ring">
+      <div class="ring-wrap">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="var(--surface2)" stroke-width="8"/>
+          <circle cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-dasharray="201" id="ring-circle" stroke-dashoffset="201" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-score" id="ring-score-num">0%</div>
+      </div>
+      <div>
+        <div style="font-size:14px; font-weight:500; margin-bottom:6px;">Minggu ini</div>
+        <div style="font-size:13px; color:var(--text2);" id="discipline-desc">Selesaikan habits & tugas untuk meningkatkan skor!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's todo quick view -->
+  <div class="card">
+    <h3>📋 Tugas Hari Ini</h3>
+    <div id="dash-todo-list">
+      <div class="empty-state">Belum ada tugas. Tambah di To-Do!</div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== HABITS =================== -->
+<div class="page" id="page-habits">
+  <div class="page-header">
+    <h1>Habit Tracker</h1>
+    <p>Bangun konsistensi satu hari satu langkah.</p>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="row">
+      <div class="form-group" style="margin:0;">
+        <input type="text" id="habit-name-input" placeholder="Nama habit baru (misal: Belajar Jepang 30 menit)">
+      </div>
+      <select id="habit-category" style="width:160px; flex:0 0 160px;">
+        <option value="belajar">📚 Belajar</option>
+        <option value="kesehatan">💪 Kesehatan</option>
+        <option value="produktif">💡 Produktif</option>
+        <option value="lainnya">🌟 Lainnya</option>
+      </select>
+      <button class="btn btn-primary" onclick="addHabit()">+ Tambah</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Habits Aktif</h3>
+    <div id="habits-list"><div class="empty-state">Belum ada habit. Tambahkan di atas!</div></div>
+  </div>
+  <div class="card">
+    <h3>📅 Streak Kalender (30 hari terakhir)</h3>
+    <div id="streak-calendars"></div>
+  </div>
+  <div class="card">
+    <h3>⚠️ Punishment Tracker</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Setiap kali kamu melewatkan habit, catat konsekuensinya sebagai tanggung jawab diri sendiri.</p>
+    <div id="punishment-list"><div class="empty-state">Tidak ada pelanggaran hari ini. Tetap konsisten! 💪</div></div>
+  </div>
+</div>
+
+<!-- =================== JOURNAL =================== -->
+<div class="page" id="page-journal">
+  <div class="page-header">
+    <h1>Daily Journal</h1>
+    <p>Refleksi harian untuk pertumbuhan diri.</p>
+  </div>
+  <div class="card">
+    <h3>✍️ Catatan Hari Ini — <span id="journal-today-date"></span></h3>
+    <div class="form-group">
+      <label>Bagaimana perasaanmu hari ini?</label>
+      <div id="mood-selector" style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="mood-btn" onclick="selectMood('😊')" data-mood="😊">😊</button>
+        <button class="mood-btn" onclick="selectMood('😐')" data-mood="😐">😐</button>
+        <button class="mood-btn" onclick="selectMood('😔')" data-mood="😔">😔</button>
+        <button class="mood-btn" onclick="selectMood('😤')" data-mood="😤">😤</button>
+        <button class="mood-btn" onclick="selectMood('🤩')" data-mood="🤩">🤩</button>
+        <button class="mood-btn" onclick="selectMood('😴')" data-mood="😴">😴</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Apa yang kamu lakukan hari ini?</label>
+      <textarea id="journal-activity" placeholder="Ceritakan aktivitasmu..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Apa yang kamu syukuri hari ini?</label>
+      <textarea id="journal-grateful" placeholder="3 hal yang kamu syukuri..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Apa yang bisa dilakukan lebih baik?</label>
+      <textarea id="journal-improve" placeholder="Refleksi untuk besok..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveJournalEntry()">💾 Simpan Catatan</button>
+  </div>
+  <div class="card">
+    <h3>📚 Riwayat Catatan</h3>
+    <div id="journal-history"><div class="empty-state">Belum ada catatan.</div></div>
+  </div>
+</div>
+
+<!-- =================== TODO =================== -->
+<div class="page" id="page-todo">
+  <div class="page-header">
+    <h1>To-Do List</h1>
+    <p>Selesaikan satu per satu, tetap fokus.</p>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div class="form-group" style="margin:0;">
+        <input type="text" id="todo-input" placeholder="Tambah tugas baru..." onkeydown="if(event.key==='Enter') addTodo()">
+      </div>
+      <select id="todo-priority" style="width:130px; flex:0 0 130px;">
+        <option value="high">🔴 Tinggi</option>
+        <option value="med" selected>🟡 Sedang</option>
+        <option value="low">🟢 Rendah</option>
+      </select>
+      <input type="date" id="todo-due" style="width:150px; flex:0 0 150px;">
+      <button class="btn btn-primary" onclick="addTodo()">+ Tambah</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📋 Tugas Aktif</h3>
+    <div id="todo-list-active"><div class="empty-state">Tidak ada tugas aktif.</div></div>
+  </div>
+  <div class="card">
+    <h3>✅ Selesai</h3>
+    <div id="todo-list-done"><div class="empty-state">Belum ada yang selesai hari ini.</div></div>
+  </div>
+</div>
+
+<!-- =================== GOALS =================== -->
+<div class="page" id="page-goals">
+  <div class="page-header">
+    <h1>Goals & Milestones</h1>
+    <p>Target besar dimulai dari langkah kecil yang konsisten.</p>
+  </div>
+  <button class="btn btn-primary" onclick="openGoalModal()" style="margin-bottom:16px;">+ Tambah Goal</button>
+  <div id="goals-list"><div class="empty-state card" style="padding:32px;">Belum ada goal. Tambahkan target kamu!</div></div>
+</div>
+
+<!-- =================== FINANCE =================== -->
+<div class="page" id="page-finance">
+  <div class="page-header">
+    <h1>Catatan Keuangan</h1>
+    <p>Kontrol pengeluaran, capai kebebasan finansial.</p>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="card stat-card">
+      <div class="stat-num" style="color:var(--accent2);" id="fin-income">Rp0</div>
+      <div class="stat-label">💚 Pemasukan Bulan Ini</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-num" style="color:var(--danger);" id="fin-expense">Rp0</div>
+      <div class="stat-label">🔴 Pengeluaran Bulan Ini</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-num" id="fin-balance">Rp0</div>
+      <div class="stat-label">💰 Saldo Bersih</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>➕ Tambah Transaksi</h3>
+      <div class="form-group">
+        <label>Nama</label>
+        <input type="text" id="tx-name" placeholder="Makan siang, Gaji, dll.">
+      </div>
+      <div class="form-group">
+        <label>Jumlah (Rp)</label>
+        <input type="number" id="tx-amount" placeholder="50000">
+      </div>
+      <div class="form-group">
+        <label>Tipe</label>
+        <select id="tx-type">
+          <option value="in">💚 Pemasukan</option>
+          <option value="out">🔴 Pengeluaran</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select id="tx-cat">
+          <option>Makanan & Minuman</option>
+          <option>Transportasi</option>
+          <option>Belanja</option>
+          <option>Hiburan</option>
+          <option>Kesehatan</option>
+          <option>Pendidikan</option>
+          <option>Gaji/Pemasukan</option>
+          <option>Tabungan</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addTransaction()">Simpan Transaksi</button>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Budget Target</h3>
+      <div id="budget-list"><div class="empty-state">Belum ada budget target.</div></div>
+      <hr class="divider">
+      <div class="row" style="margin-top:10px;">
+        <input type="text" id="budget-cat" placeholder="Kategori">
+        <input type="number" id="budget-amount" placeholder="Target (Rp)">
+        <button class="btn btn-secondary btn-sm" onclick="addBudget()">+ Tambah</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Grafik Pengeluaran per Kategori</h3>
+    <div class="chart-container">
+      <canvas id="finance-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🧾 Riwayat Transaksi</h3>
+    <div id="tx-list"><div class="empty-state">Belum ada transaksi.</div></div>
+  </div>
+</div>
+
+<!-- =================== TIME TRACKING =================== -->
+<div class="page" id="page-timetrack">
+  <div class="page-header">
+    <h1>Time Tracking</h1>
+    <p>Lacak waktu produktifmu — dan waktu yang terbuang.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card" style="text-align:center;">
+      <h3>⏱️ Fokus Timer</h3>
+      <div class="timer-display" id="timer-display">00:00:00</div>
+      <div style="margin-bottom:12px; font-size:13px; color:var(--text2);">
+        <input type="text" id="timer-label" placeholder="Sedang mengerjakan apa?" style="text-align:center; max-width:280px; margin:0 auto;">
+      </div>
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="timer-start-btn" onclick="timerToggle()">▶ Mulai</button>
+        <button class="btn btn-secondary" onclick="timerReset()">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h3>😈 Punishment Timer</h3>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Catat waktu yang terbuang untuk hal tidak produktif (sosmed, dll.)</p>
+      <div class="timer-display" id="punishment-timer-display" style="color:var(--danger);">00:00:00</div>
+      <div class="timer-controls">
+        <button class="btn btn-danger" id="punishment-start-btn" onclick="punishmentTimerToggle()">▶ Mulai</button>
+        <button class="btn btn-secondary" onclick="punishmentTimerReset()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Sesi Hari Ini</h3>
+    <div id="sessions-list"><div class="empty-state">Belum ada sesi tercatat.</div></div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Total Waktu Hari Ini</h3>
+    <div class="grid-2">
+      <div style="text-align:center;">
+        <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--accent2);" id="total-focus">0j 0m</div>
+        <div style="font-size:12px;color:var(--text3);">Total Fokus</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--danger);" id="total-wasted">0j 0m</div>
+        <div style="font-size:12px;color:var(--text3);">Waktu Terbuang</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== SETTINGS =================== -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <h1>Pengaturan</h1>
+    <p>Konfigurasi, backup data, dan notifikasi.</p>
+  </div>
+
+  <div class="card">
+    <h3>👤 Profil</h3>
+    <div class="form-group">
+      <label>Nama kamu</label>
+      <input type="text" id="user-name" placeholder="Masukkan namamu..." onchange="saveSetting('userName', this.value)">
+    </div>
+    <div class="form-group">
+      <label>Bahasa yang sedang dipelajari</label>
+      <input type="text" id="lang-learning" placeholder="Jepang, Korea, Inggris..." onchange="saveSetting('langLearning', this.value)">
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔔 Notifikasi Browser</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Aktifkan notifikasi untuk reminder malam (review) dan minum air putih.</p>
+    <div class="form-group">
+      <label>Jam reminder malam (review harian)</label>
+      <input type="time" id="notif-time" value="21:00" onchange="saveSetting('notifTime', this.value)" style="max-width:140px;">
+    </div>
+    <div class="form-group">
+      <label>Interval reminder minum air (menit)</label>
+      <input type="number" id="water-interval" value="90" min="30" max="240" onchange="saveSetting('waterInterval', this.value)" style="max-width:120px;">
+    </div>
+    <button class="btn btn-primary" onclick="requestNotification()">🔔 Aktifkan Notifikasi</button>
+  </div>
+
+  <div class="card">
+    <h3>💾 Backup & Restore Data</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">Semua data disimpan di browser ini. Export secara rutin agar tidak hilang.</p>
+    <div class="data-actions">
+      <button class="btn btn-primary" onclick="exportData()">📥 Export Data (.json)</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📤 Import Data</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-secondary" style="color:var(--danger);" onclick="confirmClearData()">🗑️ Hapus Semua Data</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ℹ️ Tentang MyProductivity</h3>
+    <p style="font-size:13px;color:var(--text2);">Dibuat khusus untukmu. Semua data tersimpan lokal di browser. Gunakan Export/Import untuk pindah device. Versi 1.0</p>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- MODAL: Add Goal -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal">
+    <h2>Tambah Goal Baru</h2>
+    <div class="form-group"><label>Nama Goal</label><input type="text" id="goal-title-input" placeholder="Hafal 1000 kosakata Jepang"></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="goal-desc-input" placeholder="Jelaskan goalmu..." style="min-height:60px;"></textarea></div>
+    <div class="form-group"><label>Target Selesai</label><input type="date" id="goal-deadline-input"></div>
+    <div class="form-group"><label>Kategori</label>
+      <select id="goal-cat-input">
+        <option>Belajar Bahasa</option><option>Karir</option><option>Kesehatan</option><option>Keuangan</option><option>Lainnya</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('goal-modal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveGoal()">Simpan Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Journal Detail -->
+<div class="modal-overlay" id="journal-modal">
+  <div class="modal">
+    <h2 id="journal-modal-date">Catatan</h2>
+    <div id="journal-modal-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('journal-modal')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// =================== DATA STORE ===================
+let DB = {
+  habits: [],
+  habitLogs: {}, // { "habitId-YYYY-MM-DD": true/false }
+  journal: {},   // { "YYYY-MM-DD": { mood, activity, grateful, improve } }
+  todos: [],
+  goals: [],
+  transactions: [],
+  budgets: [],
+  timerSessions: [],
+  punishmentSessions: [],
+  water: {},     // { "YYYY-MM-DD": 0-8 }
+  settings: {
+    userName: '',
+    langLearning: '',
+    notifTime: '21:00',
+    waterInterval: 90
+  }
+};
+
+function loadDB() {
+  const saved = localStorage.getItem('myproductivity_v1');
+  if (saved) {
+    try { DB = Object.assign(DB, JSON.parse(saved)); } catch(e) {}
+  }
+}
+
+function saveDB() {
+  localStorage.setItem('myproductivity_v1', JSON.stringify(DB));
+}
+
+function saveSetting(key, val) {
+  DB.settings[key] = val;
+  saveDB();
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
+}
+
+function formatRp(n) {
+  return 'Rp' + Number(n).toLocaleString('id-ID');
+}
+
+// =================== NAVIGATION ===================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'home') renderDashboard();
+  if (name === 'habits') renderHabits();
+  if (name === 'journal') renderJournal();
+  if (name === 'todo') renderTodos();
+  if (name === 'goals') renderGoals();
+  if (name === 'finance') renderFinance();
+  if (name === 'timetrack') renderTimetrack();
+  if (name === 'settings') loadSettings();
+}
+
+// =================== QUOTES ===================
+const QUOTES = [
+  // Personal
+  { text: "Terus Berjuang dan Jangan Menyerah.", author: "Bapak" },
+  // User-added tokoh dunia
+  { text: "Ubah luka menjadi kebijaksanaan.", author: "Oprah Winfrey" },
+  { text: "Jadilah perubahan yang ingin kamu lihat di dunia.", author: "Mahatma Gandhi" },
+  { text: "Orang yang tidak pernah membuat kesalahan berarti tidak pernah mencoba sesuatu yang baru.", author: "Albert Einstein" },
+  { text: "Satu-satunya cara untuk melakukan pekerjaan hebat adalah mencintai apa yang kamu kerjakan.", author: "Steve Jobs" },
+  { text: "Saya tidak pernah kalah. Saya menang atau saya belajar.", author: "Nelson Mandela" },
+  { text: "Kalo kau lapar, makanlah.", author: "Monkey D Luffy" },
+  { text: "Jangan lupa coba Terraria.", author: "Minecraft" },
+  // Tokoh dunia
+  { text: "Disiplin adalah jembatan antara tujuan dan pencapaian.", author: "Jim Rohn" },
+  { text: "Kamu tidak perlu hebat untuk memulai, tapi kamu harus memulai untuk menjadi hebat.", author: "Zig Ziglar" },
+  { text: "Motivasi membuatmu memulai. Kebiasaan yang membuatmu terus berjalan.", author: "Jim Ryun" },
+  { text: "Investasi terbaik adalah investasi pada dirimu sendiri.", author: "Warren Buffett" },
+  { text: "Orang yang konsisten akan selalu mengalahkan orang yang hanya sesekali brilian.", author: "Anonim" },
+  { text: "Jangan menghitung hari. Buat setiap hari berarti.", author: "Muhammad Ali" },
+  { text: "Sukses adalah hasil akumulasi dari usaha-usaha kecil yang dilakukan setiap hari.", author: "Robert Collier" },
+  { text: "Tidak ada jalan pintas menuju tempat yang layak dituju.", author: "Beverly Sills" },
+  { text: "Kesuksesan bukanlah akhir, kegagalan bukanlah kehancuran. Keberanian untuk melanjutkan itulah yang penting.", author: "Winston Churchill" },
+  { text: "Di tengah setiap kesulitan tersimpan sebuah kesempatan.", author: "Albert Einstein" },
+  { text: "Percayalah kamu bisa, dan kamu sudah separuh jalan.", author: "Theodore Roosevelt" },
+  { text: "Masa depan adalah milik mereka yang percaya pada keindahan impian-impian mereka.", author: "Eleanor Roosevelt" },
+  { text: "Apakah kamu berpikir bisa atau tidak bisa, keduanya benar.", author: "Henry Ford" },
+  { text: "Semua yang kamu inginkan ada di sisi lain rasa takut.", author: "George Addair" },
+  { text: "Hanya orang-orang yang gila yang berpikir bisa mengubah dunia, dan merekalah yang melakukannya.", author: "Steve Jobs" },
+  { text: "Imajinasi lebih penting daripada pengetahuan. Pengetahuan itu terbatas, tapi imajinasi mencakup seluruh dunia.", author: "Albert Einstein" },
+  { text: "Kepemimpinan dan pembelajaran tidak bisa dipisahkan satu sama lain.", author: "John F. Kennedy" },
+  { text: "Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia.", author: "Nelson Mandela" },
+  { text: "Gantungkan cita-citamu setinggi langit! Bermimpilah setinggi langit. Jika engkau jatuh, engkau akan jatuh di antara bintang-bintang.", author: "Ir. Soekarno" },
+  { text: "Masa depan memberi penghargaan bagi mereka yang terus maju.", author: "Barack Obama" },
+  { text: "Fokuslah menjadi produktif, bukan sekadar sibuk saja.", author: "Tim Ferriss" },
+  { text: "Hidup itu sederhana, kita yang membuatnya sulit.", author: "Confucius" },
+  { text: "Semua impian kita bisa menjadi kenyataan, jika kita memiliki keberanian untuk mengejarnya.", author: "Walt Disney" },
+  { text: "Rahasia untuk maju adalah memulai.", author: "Mark Twain" },
+  { text: "Jika kamu berpikir terlalu kecil untuk membuat sebuah perubahan, cobalah tidur di ruangan dengan seekor nyamuk.", author: "Dalai Lama" },
+  { text: "Anda mungkin bisa menunda, tapi waktu tidak akan menunggu.", author: "Benjamin Franklin" },
+  { text: "Tidak ada yang akan berhasil kecuali kau melakukannya.", author: "Maya Angelou" },
+  { text: "Tidak apa-apa untuk merayakan kesuksesan, tapi lebih penting untuk memperhatikan pelajaran tentang kegagalan.", author: "Bill Gates" },
+  { text: "Tersenyumlah pada orang yang menghinamu ketika kamu sedang berjuang membangun mimpimu. Karena mereka akan bekerja untukmu suatu hari nanti.", author: "Jack Ma" },
+  { text: "Rintangan terbesar adalah penolakan. Apa pun bisnis yang kamu mulai, bersiaplah untuk itu.", author: "John Paul Dejoria" },
+  { text: "Orang lemah akan balas dendam, orang kuat akan memaafkan, orang pintar akan mengabaikan.", author: "Albert Einstein" },
+  { text: "Beberapa orang memimpikan kesuksesan, sementara yang lain bangun setiap pagi untuk mewujudkannya.", author: "Wayne Huizenga" },
+  { text: "Saya telah gagal berulang kali dalam hidup saya. Dan itulah mengapa saya berhasil.", author: "Michael Jordan" },
+  { text: "Kalau mau menunggu sampai siap, kita akan menghabiskan sisa hidup kita hanya untuk menunggu.", author: "Lemony Snicket" },
+  { text: "Keberhasilan adalah kemampuan untuk melewati dan mengatasi dari satu kegagalan ke kegagalan berikutnya tanpa kehilangan semangat.", author: "Winston Churchill" },
+  { text: "Dengan cara yang lembut, kamu bisa mengguncang dunia.", author: "Mahatma Gandhi" },
+  { text: "Sukses adalah jumlah dari usaha-usaha kecil yang diulang hari demi hari.", author: "Robert Collier" },
+  { text: "Kamu tidak pernah terlalu tua untuk menetapkan tujuan baru atau bermimpi impian baru.", author: "C.S. Lewis" },
+  { text: "Kesulitan sering menyiapkan orang biasa untuk takdir yang luar biasa.", author: "C.S. Lewis" },
+  { text: "Kemuliaan terbesar dalam hidup bukanlah tidak pernah jatuh, tapi bangkit setiap kali kita jatuh.", author: "Nelson Mandela" },
+  { text: "Jangan biarkan apa yang tidak bisa kamu lakukan mengganggu apa yang bisa kamu lakukan.", author: "John Wooden" },
+  { text: "Rasa sakit membuat Anda berpikir. Pikiran membuat Anda bijaksana. Kebijaksanaan membuat kita bisa bertahan dalam hidup.", author: "John Patrick" },
+  { text: "Lebih baik bertempur dan kalah daripada tidak pernah bertempur sama sekali.", author: "Arthur Hugh Clough" },
+  { text: "Sebelum menolong orang lain, saya harus dapat menolong diri sendiri terlebih dahulu.", author: "Petrus Claver" },
+  { text: "Usaha dan keberanian tidak cukup tanpa tujuan dan arah perencanaan.", author: "John F. Kennedy" },
+  { text: "Barang siapa menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan baginya jalan menuju surga.", author: "Rasulullah SAW" },
+  // Anime quotes
+  { text: "Sampai matipun aku akan mengejar cita-citaku.", author: "Naruto Uzumaki (Naruto)" },
+  { text: "Jika kau ingin orang-orang percaya pada hal yang ingin kau lakukan, jangan hanya mengatakannya saja, tapi lakukan dengan tindakanmu.", author: "Kagemasa (Boruto)" },
+  { text: "Aku pasti akan melakukan apa yang telah aku tetapkan.", author: "Syaoran (Tsubasa Chronicle)" },
+  { text: "Apakah kekalahan membuktikan kalian itu lemah? Bukankah kalah lebih terdengar seperti ujian? Apa kalian bisa berdiri dan berjalan lagi setelah terjatuh?", author: "Takeda Ittetsu (Haikyuu!)" },
+  { text: "Hidup ini seperti pensil yang lama-lama akan habis, tetapi akan meninggalkan tulisan yang indah dalam kehidupan.", author: "Nami (One Piece)" },
+  { text: "Hidup itu harus memilih. Di saat kau tidak memilih, itulah pilihanmu.", author: "Monkey D Luffy (One Piece)" },
+  { text: "Jalan seorang pria harus melewati darah dan air mata, karena penderitaan hiduplah yang menempa manusia.", author: "Roronoa Zoro (One Piece)" },
+  { text: "Mula-mula, kau harus merubah dirimu sendiri, atau tidak akan ada yang berubah untukmu.", author: "Sakata Gintoki (Gintama)" },
+  { text: "Ketika dunia jahat kepadamu, maka berusahalah untuk menghadapinya, karena tidak ada orang yang membantumu jika kau tidak berusaha.", author: "Roronoa Zoro (One Piece)" },
+  { text: "Manusia adalah makhluk yang perkasa, karena kita memiliki kemampuan untuk merubah diri kita sendiri.", author: "Saitama (One Punch Man)" },
+  { text: "Tidak peduli seberapa gelap malam, fajar akan selalu datang.", author: "One Piece" },
+  { text: "Jangan menyerah! Tidak ada malu dalam jatuh. Malu itu jika kamu tidak pernah bangkit kembali!", author: "Anime" },
+  { text: "Kehidupan orang tidak berakhir ketika mereka mati. Itu berakhir ketika mereka kehilangan kepercayaan.", author: "Itachi Uchiha (Naruto)" },
+  { text: "Hidup bukanlah permainan keberuntungan. Jika kamu ingin menang, bekerja keraslah.", author: "Sora (No Game No Life)" },
+  { text: "Manusia kuat karena kita bisa mengubah diri kita.", author: "Saitama (One Punch Man)" },
+  { text: "Bangkit dan berjalan. Terus melangkah. Kamu punya dua kaki yang baik. Gunakan itu.", author: "Edward Elric (Fullmetal Alchemist)" },
+  { text: "Jatuh bukanlah hal yang memalukan. Malu yang sebenarnya adalah ketika kita tidak berdiri setelah jatuh.", author: "Midorima Shintarou (Kuroko no Basket)" },
+  { text: "Kamu sendiri yang harus berubah dulu, atau tidak ada yang akan berubah untukmu.", author: "Gintoki Sakata (Gintama)" },
+  { text: "Ketika hidup terasa berat, ingatlah bahwa tiap langkah kecil membawamu lebih dekat pada tujuanmu.", author: "Edward Elric (Fullmetal Alchemist)" },
+  { text: "Jika kamu menyerah sebelum mencobanya, kamu sudah kalah tanpa pernah berjuang.", author: "Erza Scarlet (Fairy Tail)" },
+  { text: "Kita harus lebih kuat dari hari kemarin.", author: "Rock Lee (Naruto)" },
+  { text: "Kegagalan juga menyenangkan, hidup dengan kepercayaan bahwa cobaan berguna untuk menempa diri sendiri.", author: "Jiraiya (Naruto)" },
+  { text: "Aku tak akan menarik kembali kata-kataku, karena itulah jalan ninjaku.", author: "Naruto Uzumaki" },
+  { text: "Saya tidak takut dengan tantangan baru ini. Seperti seorang pejuang sejati, saya akan bangkit untuk menghadapinya.", author: "Vegeta (Dragon Ball)" },
+  { text: "Hidup adalah perjalanan yang penuh tantangan. Jika kita takut mengambil langkah, kita takkan pernah maju.", author: "Natsu Dragneel (Fairy Tail)" },
+  { text: "Meski hidup itu menyakitkan dan sulit, orang harus tetap menghargai apa artinya hidup.", author: "Yato (Noragami)" },
+  { text: "Tidak ada satu pun yang lebih kuat daripada seseorang yang bersusah payah demi mimpi mereka.", author: "One Piece" },
+  { text: "Kerja keras tidak ada artinya bagi mereka yang tidak percaya pada diri sendiri.", author: "Maito Gai (Naruto)" },
+];
+
+// =================== DRAWER ===================
+function toggleDrawer() {
+  const drawer = document.getElementById('nav-drawer');
+  const overlay = document.getElementById('nav-overlay');
+  const btn = document.getElementById('hamburger-btn');
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    btn.classList.remove('open');
+  } else {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeDrawer() {
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+}
+
+function navTo(name) {
+  showPage(name);
+  closeDrawer();
+}
+
+function renderQuote() {
+  const idx = Math.floor(Math.random() * QUOTES.length);
+  const q = QUOTES[idx];
+  document.getElementById('quote-text').textContent = q.text;
+  document.getElementById('quote-author').textContent = '— ' + q.author;
+}
+
+// =================== WATER ===================
+function renderWater() {
+  const t = today();
+  if (!DB.water[t]) DB.water[t] = 0;
+  const count = DB.water[t];
+  document.getElementById('water-count').textContent = count;
+  const container = document.getElementById('water-glasses');
+  container.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const g = document.createElement('div');
+    g.className = 'glass' + (i < count ? ' filled' : '');
+    g.title = i < count ? 'Sudah diminum' : 'Klik untuk catat';
+    g.onclick = () => toggleGlass(i);
+    g.innerHTML = i < count ? '💧' : '';
+    g.style.fontSize = '18px';
+    g.style.display = 'flex'; g.style.alignItems = 'center'; g.style.justifyContent = 'center';
+    container.appendChild(g);
+  }
+}
+
+function toggleGlass(idx) {
+  const t = today();
+  if (!DB.water[t]) DB.water[t] = 0;
+  DB.water[t] = idx < DB.water[t] ? idx : idx + 1;
+  saveDB();
+  renderWater();
+  if (DB.water[t] >= 8) toast('🎉 Target minum air tercapai!', 'success');
+}
+
+// =================== HABITS ===================
+function addHabit() {
+  const name = document.getElementById('habit-name-input').value.trim();
+  if (!name) return toast('Nama habit tidak boleh kosong!');
+  const cat = document.getElementById('habit-category').value;
+  DB.habits.push({ id: Date.now().toString(), name, cat, createdAt: today() });
+  document.getElementById('habit-name-input').value = '';
+  saveDB();
+  renderHabits();
+  toast('✅ Habit berhasil ditambahkan!', 'success');
+}
+
+function toggleHabit(id) {
+  const key = id + '-' + today();
+  DB.habitLogs[key] = !DB.habitLogs[key];
+  if (!DB.habitLogs[key]) {
+    // Missed — add punishment
+    const h = DB.habits.find(h => h.id === id);
+    if (h) {
+      DB.punishmentSessions.push({
+        id: Date.now().toString(),
+        type: 'habit-miss',
+        label: 'Melewatkan: ' + h.name,
+        date: today()
+      });
+      toast('😬 Habit dilewatkan dicatat sebagai pelanggaran.', 'warn');
+    }
+  }
+  saveDB();
+  renderHabits();
+  renderDashboard();
+}
+
+function deleteHabit(id) {
+  if (!confirm('Hapus habit ini?')) return;
+  DB.habits = DB.habits.filter(h => h.id !== id);
+  saveDB();
+  renderHabits();
+}
+
+function getStreak(habitId) {
+  let streak = 0;
+  let d = new Date();
+  while (true) {
+    const key = habitId + '-' + d.toISOString().split('T')[0];
+    if (DB.habitLogs[key]) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+function renderHabits() {
+  const list = document.getElementById('habits-list');
+  if (!DB.habits.length) { list.innerHTML = '<div class="empty-state">Belum ada habit.</div>'; return; }
+  list.innerHTML = DB.habits.map(h => {
+    const key = h.id + '-' + today();
+    const done = !!DB.habitLogs[key];
+    const streak = getStreak(h.id);
+    const catLabels = { belajar: '📚', kesehatan: '💪', produktif: '💡', lainnya: '🌟' };
+    return `<div class="habit-item">
+      <div class="habit-check ${done ? 'done' : ''}" onclick="toggleHabit('${h.id}')">${done ? '✓' : ''}</div>
+      <div class="habit-info">
+        <div class="habit-name">${catLabels[h.cat] || '🌟'} ${h.name}</div>
+        <div class="habit-streak"><span class="streak-fire">🔥</span> ${streak} hari streak</div>
+      </div>
+      <div class="habit-actions">
+        <button class="btn-icon" onclick="deleteHabit('${h.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Streak calendar
+  const calContainer = document.getElementById('streak-calendars');
+  calContainer.innerHTML = DB.habits.map(h => {
+    let dots = '';
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const key = h.id + '-' + d.toISOString().split('T')[0];
+      const created = new Date(h.createdAt);
+      if (d < created) dots += `<div class="streak-dot" style="opacity:0.2"></div>`;
+      else if (DB.habitLogs[key]) dots += `<div class="streak-dot done" title="${formatDate(d.toISOString().split('T')[0])}"></div>`;
+      else if (d <= new Date()) dots += `<div class="streak-dot miss" title="${formatDate(d.toISOString().split('T')[0])}"></div>`;
+    }
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${h.name}</div>
+      <div class="streak-calendar">${dots}</div>
+    </div>`;
+  }).join('');
+
+  // Punishment
+  const todayPunishments = DB.punishmentSessions.filter(p => p.date === today());
+  const punList = document.getElementById('punishment-list');
+  if (!todayPunishments.length) {
+    punList.innerHTML = '<div class="empty-state">Tidak ada pelanggaran hari ini. Tetap konsisten! 💪</div>';
+  } else {
+    punList.innerHTML = `<ul class="punishment-list">${todayPunishments.map(p =>
+      `<li class="punishment-item"><span>⚠️</span><span>${p.label}</span><span class="badge badge-red" style="margin-left:auto">Dilanggar</span></li>`
+    ).join('')}</ul>`;
+  }
+}
+
+// =================== JOURNAL ===================
+let selectedMood = '';
+
+function selectMood(m) {
+  selectedMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.mood === m);
+  });
+}
+
+function saveJournalEntry() {
+  const activity = document.getElementById('journal-activity').value.trim();
+  const grateful = document.getElementById('journal-grateful').value.trim();
+  const improve = document.getElementById('journal-improve').value.trim();
+  if (!activity) return toast('Catatan aktivitas tidak boleh kosong!');
+  DB.journal[today()] = { mood: selectedMood, activity, grateful, improve, savedAt: new Date().toISOString() };
+  saveDB();
+  renderJournal();
+  toast('📓 Catatan tersimpan!', 'success');
+}
+
+function renderJournal() {
+  const t = today();
+  document.getElementById('journal-today-date').textContent = formatDate(t);
+  const entry = DB.journal[t];
+  if (entry) {
+    document.getElementById('journal-activity').value = entry.activity || '';
+    document.getElementById('journal-grateful').value = entry.grateful || '';
+    document.getElementById('journal-improve').value = entry.improve || '';
+    if (entry.mood) selectMood(entry.mood);
+  }
+  // History
+  const hist = document.getElementById('journal-history');
+  const entries = Object.entries(DB.journal).sort((a, b) => b[0].localeCompare(a[0]));
+  if (!entries.length) { hist.innerHTML = '<div class="empty-state">Belum ada catatan.</div>'; return; }
+  hist.innerHTML = entries.map(([date, e]) =>
+    `<div class="journal-entry" onclick="openJournalModal('${date}')">
+      <div class="journal-date">${formatDate(date)} ${e.mood || ''}</div>
+      <div class="journal-preview">${e.activity || ''}</div>
+    </div>`
+  ).join('');
+}
+
+function openJournalModal(date) {
+  const e = DB.journal[date];
+  document.getElementById('journal-modal-date').textContent = '📓 ' + formatDate(date) + ' ' + (e.mood || '');
+  document.getElementById('journal-modal-content').innerHTML = `
+    <div class="form-group"><strong>Aktivitas:</strong><p style="font-size:14px;color:var(--text2);margin-top:6px;">${e.activity || '-'}</p></div>
+    <div class="form-group"><strong>Rasa Syukur:</strong><p style="font-size:14px;color:var(--text2);margin-top:6px;">${e.grateful || '-'}</p></div>
+    <div class="form-group"><strong>Perbaikan:</strong><p style="font-size:14px;color:var(--text2);margin-top:6px;">${e.improve || '-'}</p></div>
+  `;
+  document.getElementById('journal-modal').classList.add('open');
+}
+
+// =================== TODO ===================
+function addTodo() {
+  const text = document.getElementById('todo-input').value.trim();
+  if (!text) return toast('Isi tugas tidak boleh kosong!');
+  DB.todos.push({
+    id: Date.now().toString(),
+    text,
+    priority: document.getElementById('todo-priority').value,
+    due: document.getElementById('todo-due').value,
+    done: false,
+    createdAt: today()
+  });
+  document.getElementById('todo-input').value = '';
+  saveDB();
+  renderTodos();
+  toast('✅ Tugas ditambahkan!', 'success');
+}
+
+function toggleTodo(id) {
+  const t = DB.todos.find(t => t.id === id);
+  if (t) { t.done = !t.done; saveDB(); renderTodos(); renderDashboard(); }
+}
+
+function deleteTodo(id) {
+  DB.todos = DB.todos.filter(t => t.id !== id);
+  saveDB(); renderTodos(); renderDashboard();
+}
+
+function renderTodos() {
+  const active = DB.todos.filter(t => !t.done);
+  const done = DB.todos.filter(t => t.done);
+  const pColors = { high: 'p-high', med: 'p-med', low: 'p-low' };
+
+  const renderList = (items) => items.map(t =>
+    `<div class="todo-item">
+      <div class="todo-check ${t.done ? 'done' : ''}" onclick="toggleTodo('${t.id}')">${t.done ? '✓' : ''}</div>
+      <div class="priority-dot ${pColors[t.priority]}"></div>
+      <div class="todo-text ${t.done ? 'done-text' : ''}">${t.text}${t.due ? `<span style="font-size:11px;color:var(--text3);margin-left:8px;">📅 ${t.due}</span>` : ''}</div>
+      <button class="btn-icon" onclick="deleteTodo('${t.id}')">🗑️</button>
+    </div>`
+  ).join('');
+
+  document.getElementById('todo-list-active').innerHTML = active.length ? renderList(active) : '<div class="empty-state">Tidak ada tugas aktif. Mantap!</div>';
+  document.getElementById('todo-list-done').innerHTML = done.length ? renderList(done) : '<div class="empty-state">Belum ada yang selesai.</div>';
+}
+
+// =================== GOALS ===================
+function openGoalModal() { document.getElementById('goal-modal').classList.add('open'); }
+
+function saveGoal() {
+  const title = document.getElementById('goal-title-input').value.trim();
+  if (!title) return toast('Nama goal tidak boleh kosong!');
+  DB.goals.push({
+    id: Date.now().toString(),
+    title,
+    desc: document.getElementById('goal-desc-input').value,
+    deadline: document.getElementById('goal-deadline-input').value,
+    cat: document.getElementById('goal-cat-input').value,
+    milestones: [],
+    createdAt: today()
+  });
+  document.getElementById('goal-title-input').value = '';
+  document.getElementById('goal-desc-input').value = '';
+  document.getElementById('goal-deadline-input').value = '';
+  closeModal('goal-modal');
+  saveDB(); renderGoals();
+  toast('🎯 Goal ditambahkan!', 'success');
+}
+
+function addMilestone(goalId) {
+  const input = document.getElementById('ms-input-' + goalId);
+  const text = input.value.trim();
+  if (!text) return;
+  const goal = DB.goals.find(g => g.id === goalId);
+  if (goal) {
+    goal.milestones.push({ id: Date.now().toString(), text, done: false });
+    input.value = '';
+    saveDB(); renderGoals();
+  }
+}
+
+function toggleMilestone(goalId, msId) {
+  const goal = DB.goals.find(g => g.id === goalId);
+  if (goal) {
+    const ms = goal.milestones.find(m => m.id === msId);
+    if (ms) { ms.done = !ms.done; saveDB(); renderGoals(); }
+  }
+}
+
+function deleteGoal(id) {
+  if (!confirm('Hapus goal ini?')) return;
+  DB.goals = DB.goals.filter(g => g.id !== id);
+  saveDB(); renderGoals();
+}
+
+function renderGoals() {
+  const container = document.getElementById('goals-list');
+  if (!DB.goals.length) { container.innerHTML = '<div class="empty-state card" style="padding:32px;">Belum ada goal. Tambahkan target kamu!</div>'; return; }
+  container.innerHTML = DB.goals.map(g => {
+    const total = g.milestones.length;
+    const done = g.milestones.filter(m => m.done).length;
+    const pct = total ? Math.round((done/total)*100) : 0;
+    const msHtml = g.milestones.map(m =>
+      `<div class="milestone-item">
+        <div class="todo-check ${m.done ? 'done' : ''}" onclick="toggleMilestone('${g.id}','${m.id}')" style="width:20px;height:20px;font-size:11px;">${m.done ? '✓' : ''}</div>
+        <span style="font-size:14px;${m.done ? 'text-decoration:line-through;color:var(--text3);' : ''}">${m.text}</span>
+      </div>`
+    ).join('');
+    return `<div class="goal-card">
+      <div class="goal-header">
+        <div>
+          <div class="goal-title">🎯 ${g.title}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px;">${g.cat}</div>
+          ${g.desc ? `<div style="font-size:13px;color:var(--text3);margin-top:4px;">${g.desc}</div>` : ''}
+        </div>
+        <div style="text-align:right;">
+          ${g.deadline ? `<div class="goal-deadline">📅 ${g.deadline}</div>` : ''}
+          <button class="btn-icon" onclick="deleteGoal('${g.id}')" style="margin-top:8px;">🗑️</button>
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+          <span>Progress Milestone</span><span>${pct}%</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:var(--accent2);"></div></div>
+      </div>
+      ${msHtml}
+      <div class="row" style="margin-top:12px;">
+        <input type="text" id="ms-input-${g.id}" placeholder="Tambah milestone..." onkeydown="if(event.key==='Enter') addMilestone('${g.id}')">
+        <button class="btn btn-secondary btn-sm" onclick="addMilestone('${g.id}')">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// =================== FINANCE ===================
+let financeChart = null;
+
+function addTransaction() {
+  const name = document.getElementById('tx-name').value.trim();
+  const amount = parseFloat(document.getElementById('tx-amount').value);
+  if (!name || isNaN(amount) || amount <= 0) return toast('Isi nama dan jumlah dengan benar!');
+  DB.transactions.push({
+    id: Date.now().toString(),
+    name,
+    amount,
+    type: document.getElementById('tx-type').value,
+    cat: document.getElementById('tx-cat').value,
+    date: today()
+  });
+  document.getElementById('tx-name').value = '';
+  document.getElementById('tx-amount').value = '';
+  saveDB(); renderFinance();
+  toast('💰 Transaksi disimpan!', 'success');
+}
+
+function addBudget() {
+  const cat = document.getElementById('budget-cat').value.trim();
+  const amount = parseFloat(document.getElementById('budget-amount').value);
+  if (!cat || isNaN(amount)) return toast('Isi kategori dan target!');
+  const existing = DB.budgets.find(b => b.cat === cat);
+  if (existing) existing.amount = amount;
+  else DB.budgets.push({ cat, amount });
+  document.getElementById('budget-cat').value = '';
+  document.getElementById('budget-amount').value = '';
+  saveDB(); renderFinance();
+}
+
+function deleteTransaction(id) {
+  DB.transactions = DB.transactions.filter(t => t.id !== id);
+  saveDB(); renderFinance();
+}
+
+function renderFinance() {
+  const curMonth = today().slice(0, 7);
+  const monthTx = DB.transactions.filter(t => t.date.startsWith(curMonth));
+  const income = monthTx.filter(t => t.type === 'in').reduce((s, t) => s + t.amount, 0);
+  const expense = monthTx.filter(t => t.type === 'out').reduce((s, t) => s + t.amount, 0);
+  document.getElementById('fin-income').textContent = formatRp(income);
+  document.getElementById('fin-expense').textContent = formatRp(expense);
+  const bal = income - expense;
+  const balEl = document.getElementById('fin-balance');
+  balEl.textContent = formatRp(bal);
+  balEl.style.color = bal >= 0 ? 'var(--accent2)' : 'var(--danger)';
+
+  // Budget
+  const budgetList = document.getElementById('budget-list');
+  if (!DB.budgets.length) { budgetList.innerHTML = '<div class="empty-state">Belum ada budget.</div>'; }
+  else {
+    budgetList.innerHTML = DB.budgets.map(b => {
+      const spent = monthTx.filter(t => t.type === 'out' && t.cat === b.cat).reduce((s, t) => s + t.amount, 0);
+      const pct = Math.min(100, Math.round((spent / b.amount) * 100));
+      const color = pct > 90 ? 'var(--danger)' : pct > 70 ? 'var(--warn)' : 'var(--accent2)';
+      return `<div class="budget-bar">
+        <div class="budget-label"><span>${b.cat}</span><span>${formatRp(spent)} / ${formatRp(b.amount)}</span></div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Chart
+  const catData = {};
+  monthTx.filter(t => t.type === 'out').forEach(t => { catData[t.cat] = (catData[t.cat] || 0) + t.amount; });
+  const labels = Object.keys(catData);
+  const values = Object.values(catData);
+  const ctx = document.getElementById('finance-chart').getContext('2d');
+  if (financeChart) financeChart.destroy();
+  if (labels.length) {
+    financeChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data: values, backgroundColor: ['#C8773A','#2D6A4F','#5B4E8A','#C84B4B','#C8A03A','#5BA4CF','#8C7B6B','#A0A0A0'] }]
+      },
+      options: { plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans' }, boxWidth: 12 } } }, responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // Transaction list
+  const txList = document.getElementById('tx-list');
+  const sorted = [...DB.transactions].sort((a, b) => b.date.localeCompare(a.date));
+  if (!sorted.length) { txList.innerHTML = '<div class="empty-state">Belum ada transaksi.</div>'; return; }
+  txList.innerHTML = sorted.map(t =>
+    `<div class="tx-item">
+      <div class="tx-info">
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-cat">${t.cat} · ${t.date}</div>
+      </div>
+      <div class="tx-amount ${t.type === 'in' ? 'tx-in' : 'tx-out'}">${t.type === 'in' ? '+' : '-'}${formatRp(t.amount)}</div>
+      <button class="btn-icon" onclick="deleteTransaction('${t.id}')" style="margin-left:8px;">🗑️</button>
+    </div>`
+  ).join('');
+}
+
+// =================== TIME TRACKING ===================
+let timerInterval = null, timerSeconds = 0, timerRunning = false;
+let punishmentInterval = null, punishmentSeconds = 0, punishmentRunning = false;
+
+function formatTime(s) {
+  const h = String(Math.floor(s/3600)).padStart(2,'0');
+  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sec = String(s%60).padStart(2,'0');
+  return `${h}:${m}:${sec}`;
+}
+
+function timerToggle() {
+  if (timerRunning) {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('timer-start-btn').textContent = '▶ Lanjutkan';
+    if (timerSeconds > 0) {
+      const label = document.getElementById('timer-label').value || 'Sesi Fokus';
+      DB.timerSessions.push({ label, seconds: timerSeconds, type: 'focus', date: today() });
+      saveDB(); renderTimetrack();
+    }
+  } else {
+    timerRunning = true;
+    document.getElementById('timer-start-btn').textContent = '⏸ Pause';
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      document.getElementById('timer-display').textContent = formatTime(timerSeconds);
+    }, 1000);
+  }
+}
+
+function timerReset() {
+  clearInterval(timerInterval); timerRunning = false; timerSeconds = 0;
+  document.getElementById('timer-display').textContent = '00:00:00';
+  document.getElementById('timer-start-btn').textContent = '▶ Mulai';
+}
+
+function punishmentTimerToggle() {
+  if (punishmentRunning) {
+    clearInterval(punishmentInterval); punishmentRunning = false;
+    document.getElementById('punishment-start-btn').textContent = '▶ Mulai';
+    if (punishmentSeconds > 0) {
+      DB.punishmentSessions.push({ label: 'Waktu terbuang', seconds: punishmentSeconds, type: 'waste', date: today() });
+      saveDB(); renderTimetrack();
+    }
+  } else {
+    punishmentRunning = true;
+    document.getElementById('punishment-start-btn').textContent = '⏸ Pause';
+    punishmentInterval = setInterval(() => {
+      punishmentSeconds++;
+      document.getElementById('punishment-timer-display').textContent = formatTime(punishmentSeconds);
+    }, 1000);
+  }
+}
+
+function punishmentTimerReset() {
+  clearInterval(punishmentInterval); punishmentRunning = false; punishmentSeconds = 0;
+  document.getElementById('punishment-timer-display').textContent = '00:00:00';
+  document.getElementById('punishment-start-btn').textContent = '▶ Mulai';
+}
+
+function renderTimetrack() {
+  const todaySessions = [...DB.timerSessions, ...DB.punishmentSessions].filter(s => s.date === today());
+  const list = document.getElementById('sessions-list');
+  if (!todaySessions.length) { list.innerHTML = '<div class="empty-state">Belum ada sesi.</div>'; }
+  else {
+    list.innerHTML = todaySessions.map(s =>
+      `<div class="session-item">
+        <span>${s.type === 'focus' ? '🟢' : '🔴'} ${s.label}</span>
+        <span style="font-weight:600;color:${s.type === 'focus' ? 'var(--accent2)' : 'var(--danger)'};">${formatTime(s.seconds)}</span>
+      </div>`
+    ).join('');
+  }
+  const focusTotal = DB.timerSessions.filter(s => s.date === today()).reduce((sum, s) => sum + s.seconds, 0);
+  const wasteTotal = DB.punishmentSessions.filter(s => s.date === today() && s.type === 'waste').reduce((sum, s) => sum + s.seconds, 0);
+  document.getElementById('total-focus').textContent = `${Math.floor(focusTotal/3600)}j ${Math.floor((focusTotal%3600)/60)}m`;
+  document.getElementById('total-wasted').textContent = `${Math.floor(wasteTotal/3600)}j ${Math.floor((wasteTotal%3600)/60)}m`;
+}
+
+// =================== DASHBOARD ===================
+function renderDashboard() {
+  renderWater();
+  // Stats
+  const maxStreak = DB.habits.reduce((max, h) => Math.max(max, getStreak(h.id)), 0);
+  document.getElementById('dash-streak').textContent = maxStreak;
+  const doneTodos = DB.todos.filter(t => t.done && t.createdAt === today()).length;
+  document.getElementById('dash-tasks').textContent = doneTodos;
+
+  // Discipline score
+  const t = today();
+  const habitsTotal = DB.habits.length;
+  const habitsDone = DB.habits.filter(h => !!DB.habitLogs[h.id + '-' + t]).length;
+  const todosTotal = DB.todos.filter(t2 => t2.createdAt === t).length;
+  const todosDone = DB.todos.filter(t2 => t2.done && t2.createdAt === t).length;
+  const waterDone = DB.water[t] >= 8 ? 1 : 0;
+  const journalDone = DB.journal[t] ? 1 : 0;
+  const total = habitsTotal + todosTotal + 1 + 1;
+  const done = habitsDone + todosDone + waterDone + journalDone;
+  const score = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('dash-score').textContent = score + '%';
+
+  // Ring
+  const circumference = 201;
+  const offset = circumference - (score / 100) * circumference;
+  document.getElementById('ring-circle').style.strokeDashoffset = offset;
+  document.getElementById('ring-score-num').textContent = score + '%';
+  const desc = score >= 80 ? '🔥 Luar biasa! Kamu sangat disiplin hari ini.' :
+               score >= 50 ? '💪 Bagus! Terus pertahankan konsistensimu.' :
+                             'Masih ada waktu. Yuk kejar target hari ini!';
+  document.getElementById('discipline-desc').textContent = desc;
+
+  // Habits quick
+  const dashHabits = document.getElementById('dash-habits-list');
+  if (!DB.habits.length) { dashHabits.innerHTML = '<div class="empty-state">Tambah habit di halaman Habits!</div>'; }
+  else {
+    dashHabits.innerHTML = DB.habits.slice(0, 5).map(h => {
+      const done = !!DB.habitLogs[h.id + '-' + t];
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="width:18px;height:18px;border-radius:5px;background:${done ? 'var(--accent2)' : 'var(--surface2)'};border:2px solid ${done ? 'var(--accent2)' : 'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">${done ? '✓' : ''}</div>
+        <span style="font-size:14px;${done ? 'text-decoration:line-through;color:var(--text3);' : ''}">${h.name}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Todos quick
+  const dashTodos = document.getElementById('dash-todo-list');
+  const todayTodos = DB.todos.filter(t2 => !t2.done).slice(0, 5);
+  if (!todayTodos.length) { dashTodos.innerHTML = '<div class="empty-state">Semua tugas selesai! 🎉</div>'; }
+  else {
+    dashTodos.innerHTML = todayTodos.map(t2 =>
+      `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div class="priority-dot ${t2.priority === 'high' ? 'p-high' : t2.priority === 'med' ? 'p-med' : 'p-low'}"></div>
+        <span style="font-size:14px;">${t2.text}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+// =================== SETTINGS ===================
+function loadSettings() {
+  document.getElementById('user-name').value = DB.settings.userName || '';
+  document.getElementById('lang-learning').value = DB.settings.langLearning || '';
+  document.getElementById('notif-time').value = DB.settings.notifTime || '21:00';
+  document.getElementById('water-interval').value = DB.settings.waterInterval || 90;
+}
+
+// =================== NOTIFICATIONS ===================
+async function requestNotification() {
+  if (!('Notification' in window)) return toast('Browser ini tidak mendukung notifikasi.');
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    toast('🔔 Notifikasi diaktifkan!', 'success');
+    scheduleNotifications();
+  } else {
+    toast('Izin notifikasi ditolak.');
+  }
+}
+
+function scheduleNotifications() {
+  // Water reminder
+  const waterMin = (DB.settings.waterInterval || 90) * 60 * 1000;
+  setInterval(() => {
+    const t = today();
+    if ((DB.water[t] || 0) < 8) {
+      new Notification('💧 Saatnya minum air!', { body: `Kamu sudah minum ${DB.water[t] || 0} dari 8 gelas hari ini.`, icon: '' });
+    }
+  }, waterMin);
+
+  // Evening review
+  function checkEveningNotif() {
+    const now = new Date();
+    const [h, m] = (DB.settings.notifTime || '21:00').split(':').map(Number);
+    if (now.getHours() === h && now.getMinutes() === m) {
+      new Notification('🌙 Saatnya review harian!', { body: 'Buka MyProductivity dan catat refleksi harimu.' });
+    }
+  }
+  setInterval(checkEveningNotif, 60000);
+}
+
+// =================== EXPORT/IMPORT ===================
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'myproductivity-backup-' + today() + '.json';
+  a.click();
+  toast('📥 Data berhasil diekspor!', 'success');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      DB = JSON.parse(e.target.result);
+      saveDB();
+      toast('📤 Data berhasil diimpor!', 'success');
+      renderDashboard();
+    } catch {
+      toast('Gagal membaca file. Pastikan format .json benar.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function confirmClearData() {
+  if (confirm('⚠️ Hapus SEMUA data? Tindakan ini tidak bisa dibatalkan!')) {
+    localStorage.removeItem('myproductivity_v1');
+    location.reload();
+  }
+}
+
+// =================== MODAL ===================
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// =================== TOAST ===================
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// =================== INIT ===================
+loadDB();
+renderQuote();
+renderDashboard();
+
+// Auto-save reminder on visibility change
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) renderDashboard();
+});
+
+// Greeting
+window.addEventListener('load', () => {
+  const name = DB.settings.userName;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Selamat pagi' : hour < 17 ? 'Selamat siang' : 'Selamat malam';
+  const msg = name ? `${greeting}, ${name}! Siap produktif hari ini?` : 'Selamat datang! Ayo mulai hari yang produktif.';
+  setTimeout(() => toast('👋 ' + msg, 'success'), 500);
+});
+</script>
+</body>
+</html>

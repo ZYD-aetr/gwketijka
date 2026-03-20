@@ -100,7 +100,66 @@
   /* GRID */
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } #navbar { padding: 8px; } .nav-btn span.nav-label { display: none; } }
+
+  /* ===================== BOTTOM NAV (mobile) ===================== */
+  #bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+    background: var(--surface); border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    height: 64px;
+  }
+  #bottom-nav-inner { display: flex; align-items: stretch; height: 100%; }
+  .bnav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; border: none; background: none;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text3);
+    font-size: 10px; font-weight: 500; padding: 6px 2px;
+    transition: color 0.18s; position: relative; -webkit-tap-highlight-color: transparent;
+  }
+  .bnav-btn .bnav-icon { font-size: 22px; line-height: 1; }
+  .bnav-btn.active { color: var(--accent); }
+  .bnav-btn.active::after {
+    content: ''; position: absolute; top: 0; left: 25%; right: 25%; height: 2px;
+    background: var(--accent); border-radius: 0 0 3px 3px;
+  }
+
+  /* ===================== MOBILE ===================== */
+  @media (max-width: 600px) {
+    #bottom-nav { display: flex; }
+    #main { padding: 20px 14px 80px 14px; }
+    #hamburger-btn { display: none; }
+    .page-header h1 { font-size: 1.55rem; }
+    .page-header { margin-bottom: 18px; }
+    .card { padding: 14px; border-radius: 12px; margin-bottom: 12px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 12px; }
+    #quote-card { padding: 18px 16px; margin-bottom: 14px; }
+    #quote-text { font-size: 1rem; }
+    .stat-num { font-size: 1.7rem; }
+    .row { flex-wrap: wrap; }
+    .row > * { flex: 1 1 100%; }
+    .row .btn { flex: 1 1 100%; justify-content: center; margin-top: 6px; }
+    .timer-display { font-size: 2.4rem; }
+    .glass { width: 34px; height: 40px; }
+    .habit-check { width: 32px; height: 32px; border-radius: 10px; font-size: 15px; }
+    .modal { width: 96%; padding: 18px; }
+    input[type=text], input[type=number], input[type=date],
+    input[type=time], textarea, select { font-size: 16px; }
+    .discipline-ring { flex-direction: column; text-align: center; }
+    .streak-dot { width: 12px; height: 12px; }
+    #fin-income, #fin-expense, #fin-balance { font-size: 1.25rem; }
+    .timer-controls { flex-direction: column; gap: 8px; }
+    .timer-controls .btn { width: 100%; justify-content: center; }
+    .data-actions { flex-direction: column; }
+    .data-actions .btn { width: 100%; justify-content: center; }
+  }
+
+  /* Tablet */
+  @media (max-width: 800px) and (min-width: 601px) {
+    #main { padding: 72px 20px 40px 20px; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .page-header h1 { font-size: 1.8rem; }
+  }
 
   /* BUTTONS */
   .btn {
@@ -761,6 +820,27 @@
   </div>
 </div>
 
+<!-- BOTTOM NAV (mobile only) -->
+<nav id="bottom-nav">
+  <div id="bottom-nav-inner">
+    <button class="bnav-btn active" id="bnav-home" onclick="navTo('home')">
+      <span class="bnav-icon">🏠</span><span>Home</span>
+    </button>
+    <button class="bnav-btn" id="bnav-habits" onclick="navTo('habits')">
+      <span class="bnav-icon">🔥</span><span>Habits</span>
+    </button>
+    <button class="bnav-btn" id="bnav-todo" onclick="navTo('todo')">
+      <span class="bnav-icon">✅</span><span>To-Do</span>
+    </button>
+    <button class="bnav-btn" id="bnav-finance" onclick="navTo('finance')">
+      <span class="bnav-icon">💰</span><span>Duit</span>
+    </button>
+    <button class="bnav-btn" id="bnav-more" onclick="toggleDrawer()">
+      <span class="bnav-icon">☰</span><span>Menu</span>
+    </button>
+  </div>
+</nav>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 // =================== DATA STORE ===================
@@ -817,6 +897,10 @@ function showPage(name) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  // Sync bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  const bnavMap = { home:'bnav-home', habits:'bnav-habits', todo:'bnav-todo', finance:'bnav-finance' };
+  if (bnavMap[name]) document.getElementById(bnavMap[name]).classList.add('active');
   if (name === 'home') renderDashboard();
   if (name === 'habits') renderHabits();
   if (name === 'journal') renderJournal();
